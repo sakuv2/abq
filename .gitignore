@@ -1,0 +1,8 @@
+bigquery.json
+.pytest_cache
+**/*.egg-info
+**/__pycache__
+*.ipynb
+.env
+.venv
+.vscode
