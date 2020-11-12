@@ -23,3 +23,10 @@ async def test_abq(project_name: str):
     job = await bq.query("SELECT x FROM UNNEST(GENERATE_ARRAY(1, 200000)) AS x")
     result = await job.result()
     assert len(result) == 200000
+
+    from google.cloud import bigquery
+
+    parameters = [bigquery.ScalarQueryParameter("num", "INT64", 42)]
+    job = await bq.query("SELECT @num AS num", parameters=parameters)
+    result = await job.result()
+    assert result[0]["num"] == 42

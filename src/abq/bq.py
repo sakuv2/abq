@@ -250,6 +250,7 @@ class BQ(Client):
         r.raise_for_status()
         return r.json()
 
+    # https://cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll
     async def insert_rows(
         self,
         table: str,
