@@ -6,3 +6,4 @@ bigquery.json
 .env
 .venv
 .vscode
+dist
