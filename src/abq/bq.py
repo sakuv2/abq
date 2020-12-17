@@ -117,7 +117,7 @@ class BQ(Client):
         super().__init__()
 
     # https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
-    async def query(
+    async def _base_query(
         self,
         sql: str,
         parameters: Optional[
@@ -129,12 +129,12 @@ class BQ(Client):
                 ]
             ]
         ] = None,
-        projectId=None,
-        useLegacySql=False,
-        maxResults=0,
-        dryRun=False,
-        timeoutMs=0,
-        maximumBytesBilled=None,
+        projectId: Optional[str] = None,
+        useLegacySql: bool = False,
+        maxResults: int = 0,
+        dryRun: bool = False,
+        timeoutMs: int = 0,
+        maximumBytesBilled: Optional[int] = None,
     ):
         if projectId is None:
             projectId = self._project_id
@@ -160,11 +160,49 @@ class BQ(Client):
                 logger.error(msg)
                 raise QueryException(msg)
 
-        r = await self.post(
+        result = await self.post(
             endpoint=endpoint, json=data, timeout=timeoutMs + 5000, call_back=error
         )
 
-        return await JobResult.create_from_json(r.json())
+        return result.json()
+
+    async def dry_query(self, *args, **kwargs) -> int:
+        """ドライランしてbytesを返却
+
+        Returns:
+            int: x bytes
+        """
+        result = await self._base_query(dryRun=True, *args, **kwargs)
+        return int(result["totalBytesProcessed"])
+
+    async def query(
+        self,
+        sql: str,
+        parameters: Optional[
+            List[
+                Union[
+                    bigquery.ScalarQueryParameter,
+                    bigquery.ArrayQueryParameter,
+                    bigquery.StructQueryParameter,
+                ]
+            ]
+        ] = None,
+        projectId=None,
+        useLegacySql=False,
+        maxResults=0,
+        timeoutMs=0,
+        maximumBytesBilled=None,
+    ):
+        result = await self._base_query(
+            sql=sql,
+            parameters=parameters,
+            projectId=projectId,
+            useLegacySql=useLegacySql,
+            maxResults=maxResults,
+            timeoutMs=timeoutMs,
+            maximumBytesBilled=maximumBytesBilled,
+        )
+        return await JobResult.create_from_json(result)
 
     # クエリの同時実行数に制限をかける
     @retry(RETRYIES)

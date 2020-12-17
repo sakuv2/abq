@@ -30,3 +30,7 @@ async def test_abq(project_name: str):
     job = await bq.query("SELECT @num AS num", parameters=parameters)
     result = await job.result()
     assert result[0]["num"] == 42
+
+    byte = await bq.dry_query("SELECT 1")
+    assert byte == 0
+
