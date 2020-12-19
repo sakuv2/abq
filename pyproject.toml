@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abq"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 authors = ["sakuv2 <loots2438@gmail.com>"]
 

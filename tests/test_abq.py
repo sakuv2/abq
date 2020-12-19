@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def test_version():
-    assert __version__ == "0.1.2"
+    assert __version__ == "0.1.3"
 
 
 def test_credential_file(credential_file_path):
