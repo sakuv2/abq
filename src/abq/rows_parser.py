@@ -12,6 +12,7 @@ _convert_type = dict(
     DATETIME=datetime.datetime,
     TIMESTAMP=datetime.datetime,
     BOOLEAN=bool,
+    GEOGRAPHY=str,
 )
 
 
