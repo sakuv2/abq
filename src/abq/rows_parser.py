@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import create_model
 
 _convert_type = dict(
@@ -57,7 +57,8 @@ def _parse_schema(fields):
             fields = field["fields"]
             cfs = _parse_schema(fields)
         else:
-            cfs = _convert_type[type_]
+            ct = _convert_type[type_]
+            cfs = Optional[ct] if mode == "NULLABLE" else ct
         obj = [cfs] if mode == "REPEATED" else cfs
         fs[name] = obj
     return fs

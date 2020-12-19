@@ -15,10 +15,16 @@ def test_credential_file(credential_file_path):
 
 @sync
 async def test_abq(project_name: str):
+
     bq = BQ(project_name)
     job = await bq.query("SELECT 1 AS a")
     result = await job.result()
     assert result[0]["a"] == 1
+
+    # nullを含むクエリ
+    job = await bq.query("SELECT NULL AS x")
+    result = await job.result()
+    assert result[0]["x"] == None
 
     job = await bq.query("SELECT x FROM UNNEST(GENERATE_ARRAY(1, 200000)) AS x")
     result = await job.result()

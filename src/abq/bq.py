@@ -172,7 +172,8 @@ class BQ(Client):
         Returns:
             int: x bytes
         """
-        result = await self._base_query(dryRun=True, *args, **kwargs)
+        kwargs["dryRun"] = True
+        result = await self._base_query(*args, **kwargs)
         return int(result["totalBytesProcessed"])
 
     async def query(
