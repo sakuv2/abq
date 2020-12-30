@@ -14,6 +14,7 @@ from pydantic import BaseSettings
 
 from .async_retry import retry
 from .rows_parser import RowsParser
+from .job import Job
 
 logger = getLogger(__name__)
 
@@ -340,6 +341,7 @@ class JobResult(Client):
         self.project_id = projectId
         self.job_id = jobId
         self.state = None
+        self.info = None
         super().__init__()
 
     @classmethod
@@ -425,6 +427,7 @@ class JobResult(Client):
         self.state = r.json()["status"]["state"]
         if close:
             await self.close()
+        self.info = Job(**r.json())
 
     async def wait(self, state="DONE"):
         while True:
