@@ -76,8 +76,7 @@ class QueryException(Exception):
 
 class Client:
     def __init__(self):
-        limits = httpx.PoolLimits(max_keepalive=10, max_connections=100)
-        self._client = httpx.AsyncClient(pool_limits=limits)
+        self._client = httpx.AsyncClient()
 
     async def __aenter__(self) -> "Client":
         return self
@@ -90,25 +89,30 @@ class Client:
 
     @retry(RETRYIES, httpx.HTTPError)
     async def post(self, endpoint, json, timeout=5000, call_back=None):
-        r = await self._client.post(
-            url=endpoint, headers=Credential.get_headers(), json=json, timeout=timeout,
-        )
-        if call_back is not None:
-            call_back(r)
-        r.raise_for_status()
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                url=endpoint,
+                headers=Credential.get_headers(),
+                json=json,
+                timeout=timeout,
+            )
+            if call_back is not None:
+                call_back(r)
+            r.raise_for_status()
         return r
 
     @retry(RETRYIES, httpx.HTTPError)
     async def get(self, endpoint, params=None, timeout=5000, call_back=None):
-        r = await self._client.get(
-            url=endpoint,
-            headers=Credential.get_headers(),
-            params=params,
-            timeout=timeout,
-        )
-        if call_back is not None:
-            call_back(r)
-        r.raise_for_status()
+        async with httpx.AsyncClient() as client:
+            r = await client.get(
+                url=endpoint,
+                headers=Credential.get_headers(),
+                params=params,
+                timeout=timeout,
+            )
+            if call_back is not None:
+                call_back(r)
+            r.raise_for_status()
         return r
 
 
@@ -421,20 +425,17 @@ class JobResult(Client):
         r = await self.get(endpoint, params=params, timeout=timeoutMs + 5000)
         return r.json()
 
-    async def update(self, close=True):
+    async def update(self):
         endpoint = EndPoint().job.format(projectId=self.project_id) + self.job_id
         r = await self.get(endpoint)
         self.state = r.json()["status"]["state"]
-        if close:
-            await self.close()
         self.info = Job(**r.json())
 
     async def wait(self, state="DONE"):
         while True:
-            await self.update(close=False)
+            await self.update()
             if self.state == state:
                 break
             await asyncio.sleep(1)
             logger.debug(f"waiting for query state: {self}")
-        await self.close()
         return True

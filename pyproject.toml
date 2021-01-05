@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abq"
-version = "0.1.4"
+version = "0.1.5"
 description = ""
 authors = ["sakuv2 <loots2438@gmail.com>"]
 
@@ -8,8 +8,8 @@ authors = ["sakuv2 <loots2438@gmail.com>"]
 python = "^3.7"
 pydantic = {extras = ["dotenv"], version = "^1.5.1"}
 google-cloud-bigquery = "^1.25.0"
-httpx = "0.13.3"
 oauth2client = "^4.1.3"
+httpx = "^0.16.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
